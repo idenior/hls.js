@@ -43,6 +43,7 @@ header {
 
 #customButtons input { width: 25%; display : inline-block; text-align: center; font-size: 8pt;}
 #toggleButtons button { width: 19%; display : inline-block; text-align: center; font-size: 8pt; background-color: #A0A0A0 }
+#toggleButtons2 button { width: 19%; display : inline-block; text-align: center; font-size: 8pt; background-color: #A0A0A0; margin-top: 4px; }
 
 </style>
   <title>hls.js demo</title>
@@ -109,6 +110,10 @@ header {
       <button type="button" class="btn btn-sm" onclick="$('#MetricsDisplay').toggle();toggleMetricsDisplay();">toggle Metrics Display</button>
       <button type="button" class="btn btn-sm" onclick="$('#StatsDisplay').toggle();">toggle Stats Display</button>
     </div>
+    <div class="center" id="toggleButtons2">
+      <button type="button" class="btn btn-sm" onclick="$('#AudioTrackControl2').toggle();">toggle Audio Name controls</button>
+      <button type="button" class="btn btn-sm" onclick="$('#SubtitleTrackControl2').toggle();">toggle Subtitle Name controls</button>
+    </div>
 
     <div id='PlaybackControl'>
     <h4> Playback Control </h4>
@@ -159,7 +164,29 @@ header {
         <tr>
           <td>current audio track</td>
           <td width=10px></td>
-          <td> <div id="audioTrackControl" style="display: inline;"></div> </td>
+          <td> <div id="audioTracks" style="display: inline;"></div> </td>
+        </tr>
+      </table>
+    </div>
+
+    <div id='AudioTrackControl2'>
+      <h4> Audio Name Control </h4>
+      <table>
+        <tr>
+          <td>current audio name</td>
+          <td width=10px></td>
+          <td> <div id="audioTracks2" style="display: inline;"></div> </td>
+        </tr>
+      </table>
+    </div>
+
+    <div id='SubtitleTrackControl2'>
+      <h4> Subtitle Name Control </h4>
+      <table>
+        <tr>
+          <td>current subtitle name</td>
+          <td width=10px></td>
+          <td> <div id="subtitleTracks2" style="display: inline;"></div> </td>
         </tr>
       </table>
     </div>
@@ -207,11 +234,12 @@ header {
   </div>
   <br><br>
 
-  <script src="../../streams.js"></script>
+  <!--<script src="../../streams.js"></script>-->
   <script src="../dist/hls.js"></script>
   <script src="canvas.js"></script>
   <script src="metrics.js"></script>
   <script src="jsonpack.js"></script>
+  <script src="js.cookie.js"></script>
   <script>
 
 $(document).ready(function() {
@@ -221,6 +249,8 @@ $(document).ready(function() {
    $("#PlaybackControl").hide();
    $("#QualityLevelControl").hide();
    $("#AudioTrackControl").hide();
+   $("#AudioTrackControl2").hide();
+   $("#SubtitleTrackControl2").hide();
    $("#MetricsDisplay").hide();
    $("#StatsDisplay").hide();
    $('#metricsButtonWindow').toggle(windowSliding);
@@ -281,6 +311,14 @@ $(document).ready(function() {
        recoverDecodingErrorDate = recoverSwapAudioCodecDate = null;
        fmp4Data = { 'audio': [], 'video': [] };
        hls = new Hls({debug:true, enableWorker : enableWorker, defaultAudioCodec : defaultAudioCodec});
+       var cookiesAudioTrackId = Cookies.get('hls_aud_id');
+       if (cookiesAudioTrackId) {
+         hls.defaultAudioTrack = cookiesAudioTrackId;
+       }
+       var cookiesSubtitleTrackId = Cookies.get('hls_sub_id');
+       if (cookiesSubtitleTrackId) {
+         hls.defaultSubtitleTrack = cookiesSubtitleTrackId;
+       }
        $("#HlsStatus").text('loading manifest and attaching video element...');
        hls.loadSource(url);
        hls.autoLevelCapping = levelCapping;
@@ -333,18 +371,30 @@ $(document).ready(function() {
        });
        hls.on(Hls.Events.AUDIO_TRACK_SWITCHING,function(event,data) {
           updateAudioTrackInfo();
+          updateAudioTrackInfo2();
         var event = {time : performance.now() - events.t0, type : 'audio switching', name : '@' + data.id };
         events.video.push(event);
         lastAudioTrackSwitchingIdx = events.video.length-1;
        });
        hls.on(Hls.Events.AUDIO_TRACK_SWITCHED,function(event,data) {
+          Cookies.set('hls_aud_id', data.id);
           updateAudioTrackInfo();
+          updateAudioTrackInfo2();
         var event = {time : performance.now() - events.t0, type : 'audio switched', name : '@' + data.id };
         if (lastAudioTrackSwitchingIdx !== undefined) {
           events.video[lastAudioTrackSwitchingIdx].duration = event.time - events.video[lastAudioTrackSwitchingIdx].time;
           lastAudioTrackSwitchingIdx = undefined;
         }
         events.video.push(event);
+       });
+       hls.on(Hls.Events.SUBTITLE_TRACKS_UPDATED,function(event,data) {
+         $("#HlsStatus").text(data.subtitleTracks.length + " subtitle tracks found");
+         updateSubtitleTrackInfo();
+       });
+       hls.on(Hls.Events.SUBTITLE_TRACK_SWITCH,function(event,data) {
+         $("#HlsStatus").text("subtitle switch to " + data.id);
+         Cookies.set('hls_sub_id', data.id);
+         updateSubtitleTrackInfo();
        });
        hls.on(Hls.Events.LEVEL_LOADED,function(event,data) {
           events.isLive = data.details.live;
@@ -386,6 +436,22 @@ $(document).ready(function() {
           };
           events.load.push(event);
           refreshCanvas();
+       });
+       hls.on(Hls.Events.SUBTITLE_TRACK_LOADED,function(event,data) {
+         events.isLive = data.details.live;
+         var event = {
+           type : "subtitle track",
+           id : data.id,
+           start : data.details.startSN,
+           end : data.details.endSN,
+           time : data.stats.trequest - events.t0,
+           latency : data.stats.tfirst - data.stats.trequest,
+           load : data.stats.tload - data.stats.tfirst,
+           parsing : data.stats.tparsed - data.stats.tload,
+           duration : data.stats.tload - data.stats.tfirst
+         };
+         events.load.push(event);
+         refreshCanvas();
        });
        hls.on(Hls.Events.FRAG_BUFFERED,function(event,data) {
           var event = {
@@ -1050,7 +1116,7 @@ function timeRangesToString(r) {
     }
   }
 
-function updateAudioTrackInfo() {
+  function updateAudioTrackInfo() {
     var button_template = '<button type="button" class="btn btn-sm ';
     var button_enabled  = 'btn-primary" ';
     var button_disabled = 'btn-success" ';
@@ -1066,9 +1132,46 @@ function updateAudioTrackInfo() {
       }
       html1 += 'onclick="hls.audioTrack=' + i + '">' + hls.audioTracks[i].name + '</button>';
     }
-    $("#audioTrackControl").html(html1);
+    $("#audioTracks").html(html1);
   }
 
+  function updateAudioTrackInfo2() {
+    var button_template = '<button type="button" class="btn btn-sm ';
+    var button_enabled  = 'btn-primary" ';
+    var button_disabled = 'btn-success" ';
+    var html1 = '';
+    var audioTrackName = hls.audioTrackName, audioTrackNames = hls.audioTrackNames;
+
+    for (var i=0; i < audioTrackNames.length; i++) {
+      html1 += button_template;
+      if(audioTrackName === audioTrackNames[i]) {
+        html1 += button_enabled;
+      } else {
+        html1 += button_disabled;
+      }
+      html1 += 'onclick="hls.audioTrackName=\'' + audioTrackNames[i] + '\'">' + audioTrackNames[i] + '</button>';
+    }
+    $("#audioTracks2").html(html1);
+  }
+
+  function updateSubtitleTrackInfo() {
+    var button_template = '<button type="button" class="btn btn-sm ';
+    var button_enabled  = 'btn-primary" ';
+    var button_disabled = 'btn-success" ';
+    var html1 = '';
+    var subtitleTrackName = hls.subtitleTrackName, subtitleTrackNames = hls.subtitleTrackNames;
+
+    for (var i=0; i < subtitleTrackNames.length; i++) {
+      html1 += button_template;
+      if(subtitleTrackName === subtitleTrackNames[i]) {
+        html1 += button_enabled;
+      } else {
+        html1 += button_disabled;
+      }
+      html1 += 'onclick="hls.subtitleTrackName=\'' + subtitleTrackNames[i] + '\'">' + subtitleTrackNames[i] + '</button>';
+    }
+    $("#subtitleTracks2").html(html1);
+  }
 
   function level2label(index) {
     if(hls && hls.levels.length-1 >= index) {

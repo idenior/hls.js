@@ -93,6 +93,32 @@ class SubtitleTrackController extends EventHandler {
   // Fired whenever a new manifest is loaded.
   onManifestLoaded(data) {
     let tracks = data.subtitles || [];
+    // find and select default track
+    if (this.defaultTrackId >= 0 && this.defaultTrackId < tracks.length) {
+      tracks.forEach(track => {
+        track.default = track.id == this.defaultTrackId;
+      });
+    }
+    if (this.defaultTrackName) {
+      let id = tracks.map(track => {
+        return track.name;
+      }).indexOf(this.defaultTrackName);
+      if (id !== -1) {
+        tracks.forEach(track => {
+          track.default = track.id === id;
+        });
+      }
+    }
+    if (this.defaultTrackLanguage) {
+      let id = tracks.map(track => {
+        return track.lang;
+      }).indexOf(this.defaultTrackLanguage);
+      if (id !== -1) {
+        tracks.forEach(track => {
+          track.default = track.id === id;
+        });
+      }
+    }
     let defaultFound = false;
     this.tracks = tracks;
     this.trackId = -1;
@@ -162,7 +188,43 @@ class SubtitleTrackController extends EventHandler {
     }
   }
 
- setSubtitleTrackInternal(newId) {
+  /** get index of the default subtitle track (index in subtitle track lists) **/
+  get defaultSubtitleTrack() {
+    return this.defaultTrackId;
+  }
+
+  /** set a default subtitle track, based on its index in subtitle track lists **/
+  set defaultSubtitleTrack(defaultSubtitleTrackId) {
+    this.defaultTrackId = defaultSubtitleTrackId;
+    this.defaultTrackName = undefined;
+    this.defaultTrackLanguage = undefined;
+  }
+
+  /** get name of the default subtitle track **/
+  get defaultSubtitleTrackName() {
+    return this.defaultTrackName;
+  }
+
+  /** set a name subtitle track **/
+  set defaultSubtitleTrackName(defaultSubtitleTrackName) {
+    this.defaultTrackName = defaultSubtitleTrackName;
+    this.defaultTrackId = undefined;
+    this.defaultTrackLanguage = undefined;
+  }
+
+  /** get language of the default subtitle track **/
+  get defaultSubtitleTrackLanguage() {
+    return this.defaultTrackLanguage;
+  }
+
+  /** set a language subtitle track **/
+  set defaultSubtitleTrackLanguage(defaultSubtitleTrackLanguage) {
+    this.defaultTrackLanguage = defaultSubtitleTrackLanguage;
+    this.defaultTrackId = undefined;
+    this.defaultTrackName = undefined;
+  }
+
+  setSubtitleTrackInternal(newId) {
     // check if level idx is valid
     if (newId >= 0 && newId < this.tracks.length) {
       // stopping live reloading timer if any

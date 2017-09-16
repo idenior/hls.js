@@ -59,6 +59,32 @@ class AudioTrackController extends EventHandler {
 
   onManifestLoaded(data) {
     let tracks = data.audioTracks || [];
+    // find and select default track
+    if (this.defaultTrackId >= 0 && this.defaultTrackId < tracks.length) {
+      tracks.forEach(track => {
+        track.default = track.id == this.defaultTrackId;
+      });
+    }
+    if (this.defaultTrackName) {
+      let id = tracks.map(track => {
+        return track.name;
+      }).lastIndexOf(this.defaultTrackName);
+      if (id !== -1) {
+        tracks.forEach(track => {
+          track.default = track.id === id;
+        });
+      }
+    }
+    if (this.defaultTrackLanguage) {
+      let id = tracks.map(track => {
+        return track.lang;
+      }).lastIndexOf(this.defaultTrackLanguage);
+      if (id !== -1) {
+        tracks.forEach(track => {
+          track.default = track.id === id;
+        });
+      }
+    }
     let defaultFound = false;
     this.tracks = tracks;
     this.hls.trigger(Event.AUDIO_TRACKS_UPDATED, {audioTracks : tracks});
@@ -112,7 +138,45 @@ class AudioTrackController extends EventHandler {
     }
   }
 
- setAudioTrackInternal(newId) {
+  /** get index of the default audio track (index in audio track lists) **/
+  get defaultAudioTrack() {
+    return this.defaultTrackId;
+  }
+
+  /** set a default audio track, based on its index in audio track lists **/
+  set defaultAudioTrack(defaultAudioTrackId) {
+    this.defaultTrackId = defaultAudioTrackId;
+    this.defaultTrackName = undefined;
+    this.defaultTrackLanguage = undefined;
+  }
+
+  /** get name of the default audio track **/
+  get defaultAudioTrackName() {
+    return this.defaultTrackName;
+  }
+
+  /** set a name audio track **/
+  set defaultAudioTrackName(defaultAudioTrackName) {
+    this.defaultTrackName = defaultAudioTrackName;
+    this.defaultTrackId = undefined;
+    this.defaultTrackLanguage = undefined;
+
+    console.log(this.defaultTrackName);
+  }
+
+  /** get language of the default audio track **/
+  get defaultAudioTrackLanguage() {
+    return this.defaultTrackLanguage;
+  }
+
+  /** set a language audio track **/
+  set defaultAudioTrackLanguage(defaultAudioTrackLanguage) {
+    this.defaultTrackLanguage = defaultAudioTrackLanguage;
+    this.defaultTrackId = undefined;
+    this.defaultTrackName = undefined;
+  }
+
+  setAudioTrackInternal(newId) {
     // check if level idx is valid
     if (newId >= 0 && newId < this.tracks.length) {
       // stopping live reloading timer if any
