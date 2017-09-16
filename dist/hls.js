@@ -10727,6 +10727,32 @@ var audio_track_controller_AudioTrackController = function (_EventHandler) {
     var _this2 = this;
 
     var tracks = data.audioTracks || [];
+    // find and select default track
+    if (this.defaultTrackId >= 0 && this.defaultTrackId < tracks.length) {
+      tracks.forEach(function (track) {
+        track.default = track.id === _this2.defaultTrackId;
+      });
+    }
+    if (this.defaultTrackName) {
+      var _id = tracks.map(function (track) {
+        return track.name;
+      }).lastIndexOf(this.defaultTrackName);
+      if (_id !== -1) {
+        tracks.forEach(function (track) {
+          track.default = track.id === _id;
+        });
+      }
+    }
+    if (this.defaultTrackLanguage) {
+      var _id2 = tracks.map(function (track) {
+        return track.lang;
+      }).lastIndexOf(this.defaultTrackLanguage);
+      if (_id2 !== -1) {
+        tracks.forEach(function (track) {
+          track.default = track.id === _id2;
+        });
+      }
+    }
     var defaultFound = false;
     this.tracks = tracks;
     this.hls.trigger(events["a" /* default */].AUDIO_TRACKS_UPDATED, { audioTracks: tracks });
@@ -10830,6 +10856,56 @@ var audio_track_controller_AudioTrackController = function (_EventHandler) {
       if (this.trackId !== audioTrackId || this.tracks[audioTrackId].details === undefined) {
         this.setAudioTrackInternal(audioTrackId);
       }
+    }
+
+    /** get index of the default audio track (index in audio track lists) **/
+
+  }, {
+    key: 'defaultAudioTrack',
+    get: function get() {
+      return this.defaultTrackId;
+    }
+
+    /** set a default audio track, based on its index in audio track lists **/
+    ,
+    set: function set(defaultAudioTrackId) {
+      this.defaultTrackId = Number(defaultAudioTrackId);
+      this.defaultTrackName = undefined;
+      this.defaultTrackLanguage = undefined;
+    }
+
+    /** get name of the default audio track **/
+
+  }, {
+    key: 'defaultAudioTrackName',
+    get: function get() {
+      return this.defaultTrackName;
+    }
+
+    /** set a name audio track **/
+    ,
+    set: function set(defaultAudioTrackName) {
+      this.defaultTrackName = defaultAudioTrackName;
+      this.defaultTrackId = undefined;
+      this.defaultTrackLanguage = undefined;
+
+      console.log(this.defaultTrackName);
+    }
+
+    /** get language of the default audio track **/
+
+  }, {
+    key: 'defaultAudioTrackLanguage',
+    get: function get() {
+      return this.defaultTrackLanguage;
+    }
+
+    /** set a language audio track **/
+    ,
+    set: function set(defaultAudioTrackLanguage) {
+      this.defaultTrackLanguage = defaultAudioTrackLanguage;
+      this.defaultTrackId = undefined;
+      this.defaultTrackName = undefined;
     }
   }]);
 
@@ -14396,6 +14472,32 @@ var subtitle_track_controller_SubtitleTrackController = function (_EventHandler)
     var _this3 = this;
 
     var tracks = data.subtitles || [];
+    // find and select default track
+    if (this.defaultTrackId >= 0 && this.defaultTrackId < tracks.length) {
+      tracks.forEach(function (track) {
+        track.default = track.id === _this3.defaultTrackId;
+      });
+    }
+    if (this.defaultTrackName) {
+      var id = tracks.map(function (track) {
+        return track.name;
+      }).indexOf(this.defaultTrackName);
+      if (id !== -1) {
+        tracks.forEach(function (track) {
+          track.default = track.id === id;
+        });
+      }
+    }
+    if (this.defaultTrackLanguage) {
+      var _id = tracks.map(function (track) {
+        return track.lang;
+      }).indexOf(this.defaultTrackLanguage);
+      if (_id !== -1) {
+        tracks.forEach(function (track) {
+          track.default = track.id === _id;
+        });
+      }
+    }
     var defaultFound = false;
     this.tracks = tracks;
     this.trackId = -1;
@@ -14498,6 +14600,54 @@ var subtitle_track_controller_SubtitleTrackController = function (_EventHandler)
         // || this.tracks[subtitleTrackId].details === undefined) {
         this.setSubtitleTrackInternal(subtitleTrackId);
       }
+    }
+
+    /** get index of the default subtitle track (index in subtitle track lists) **/
+
+  }, {
+    key: 'defaultSubtitleTrack',
+    get: function get() {
+      return this.defaultTrackId;
+    }
+
+    /** set a default subtitle track, based on its index in subtitle track lists **/
+    ,
+    set: function set(defaultSubtitleTrackId) {
+      this.defaultTrackId = Number(defaultSubtitleTrackId);
+      this.defaultTrackName = undefined;
+      this.defaultTrackLanguage = undefined;
+    }
+
+    /** get name of the default subtitle track **/
+
+  }, {
+    key: 'defaultSubtitleTrackName',
+    get: function get() {
+      return this.defaultTrackName;
+    }
+
+    /** set a name subtitle track **/
+    ,
+    set: function set(defaultSubtitleTrackName) {
+      this.defaultTrackName = defaultSubtitleTrackName;
+      this.defaultTrackId = undefined;
+      this.defaultTrackLanguage = undefined;
+    }
+
+    /** get language of the default subtitle track **/
+
+  }, {
+    key: 'defaultSubtitleTrackLanguage',
+    get: function get() {
+      return this.defaultTrackLanguage;
+    }
+
+    /** set a language subtitle track **/
+    ,
+    set: function set(defaultSubtitleTrackLanguage) {
+      this.defaultTrackLanguage = defaultSubtitleTrackLanguage;
+      this.defaultTrackId = undefined;
+      this.defaultTrackName = undefined;
     }
   }]);
 
@@ -15199,6 +15349,112 @@ var hls_Hls = function () {
         audioTrackController.audioTrack = audioTrackId;
       }
     }
+
+    /** get index of the default audio track **/
+
+  }, {
+    key: 'defaultAudioTrack',
+    get: function get() {
+      var audioTrackController = this.audioTrackController;
+      return audioTrackController ? audioTrackController.defaultAudioTrack : null;
+    }
+
+    /** set index of the default audio track **/
+    ,
+    set: function set(defaultAudioTrackId) {
+      var audioTrackController = this.audioTrackController;
+      if (audioTrackController) {
+        audioTrackController.defaultAudioTrack = defaultAudioTrackId;
+      }
+    }
+
+    /** get unique audio track names **/
+
+  }, {
+    key: 'audioTrackNames',
+    get: function get() {
+      return Array.from(new Set(this.audioTracks.map(function (track) {
+        return track.name;
+      })));
+    }
+
+    /** get name of the selected audio track **/
+
+  }, {
+    key: 'audioTrackName',
+    get: function get() {
+      return this.audioTrack !== -1 ? this.audioTracks[this.audioTrack].name : null;
+    }
+
+    /** select an audio track, based on its name in audio track lists **/
+    ,
+    set: function set(audioTrackName) {
+      this.audioTrack = this.audioTracks.map(function (track) {
+        return track.name;
+      }).lastIndexOf(audioTrackName);
+    }
+
+    /** get name of the default audio track **/
+
+  }, {
+    key: 'defaultAudioTrackName',
+    get: function get() {
+      var audioTrackController = this.audioTrackController;
+      return audioTrackController ? audioTrackController.defaultAudioTrackName : null;
+    }
+
+    /** set name of the default audio track **/
+    ,
+    set: function set(defaultAudioTrackName) {
+      var audioTrackController = this.audioTrackController;
+      if (audioTrackController) {
+        audioTrackController.defaultAudioTrackName = defaultAudioTrackName;
+      }
+    }
+
+    /** get unique audio track languages **/
+
+  }, {
+    key: 'audioTrackLanguages',
+    get: function get() {
+      return Array.from(new Set(this.audioTracks.map(function (track) {
+        return track.lang;
+      })));
+    }
+
+    /** get language of the selected audio track **/
+
+  }, {
+    key: 'audioTrackLanguage',
+    get: function get() {
+      return this.audioTrack !== -1 ? this.audioTracks[this.audioTrack].lang : null;
+    }
+
+    /** select an audio track, based on its language in audio track lists **/
+    ,
+    set: function set(audioTrackLanguage) {
+      this.audioTrack = this.audioTracks.map(function (track) {
+        return track.lang;
+      }).lastIndexOf(audioTrackLanguage);
+    }
+
+    /** get language of the default audio track **/
+
+  }, {
+    key: 'defaultAudioTrackLanguage',
+    get: function get() {
+      var audioTrackController = this.audioTrackController;
+      return audioTrackController ? audioTrackController.defaultAudioTrackLanguage : null;
+    }
+
+    /** set language of the default audio track **/
+    ,
+    set: function set(defaultAudioTrackLanguage) {
+      var audioTrackController = this.audioTrackController;
+      if (audioTrackController) {
+        audioTrackController.defaultAudioTrackLanguage = defaultAudioTrackLanguage;
+      }
+    }
   }, {
     key: 'liveSyncPosition',
     get: function get() {
@@ -15227,8 +15483,145 @@ var hls_Hls = function () {
     ,
     set: function set(subtitleTrackId) {
       var subtitleTrackController = this.subtitleTrackController;
+      if (subtitleTrackController && this.media) {
+        //subtitleTrackController.subtitleTrack = subtitleTrackId; // TODO Don't set!
+        if (subtitleTrackId >= 0 && subtitleTrackId < this.subtitleTracks.length) {
+          if (subtitleTrackController.subtitleTrack !== -1) {
+            this.media.textTracks[subtitleTrackController.subtitleTrack].mode = 'disabled';
+          }
+          this.media.textTracks[subtitleTrackId].mode = 'showing';
+        }
+      }
+    }
+
+    /** get index of the default subtitle track **/
+
+  }, {
+    key: 'defaultSubtitleTrack',
+    get: function get() {
+      var subtitleTrackController = this.subtitleTrackController;
+      return subtitleTrackController ? subtitleTrackController.defaultSubtitleTrack : null;
+    }
+
+    /** set index of the default subtitle track **/
+    ,
+    set: function set(defaultSubtitleTrackId) {
+      var subtitleTrackController = this.subtitleTrackController;
       if (subtitleTrackController) {
-        subtitleTrackController.subtitleTrack = subtitleTrackId;
+        subtitleTrackController.defaultSubtitleTrack = defaultSubtitleTrackId;
+      }
+    }
+
+    /** get unique subtitle track names **/
+
+  }, {
+    key: 'subtitleTrackNames',
+    get: function get() {
+      return this.subtitleTracks.map(function (track) {
+        return track.name;
+      });
+    }
+
+    /** get name of the selected subtitle track **/
+
+  }, {
+    key: 'subtitleTrackName',
+    get: function get() {
+      return this.subtitleTrack !== -1 ? this.subtitleTracks[this.subtitleTrack].name : null;
+    }
+
+    /** select an subtitle track, based on its name in subtitle track lists **/
+    ,
+    set: function set(subtitleTrackName) {
+      this.subtitleTrack = this.subtitleTracks.map(function (track) {
+        return track.name;
+      }).indexOf(subtitleTrackName);
+    }
+
+    /** get name of the default subtitle track **/
+
+  }, {
+    key: 'defaultSubtitleTrackName',
+    get: function get() {
+      var subtitleTrackController = this.subtitleTrackController;
+      return subtitleTrackController ? subtitleTrackController.defaultSubtitleTrackName : null;
+    }
+
+    /** set name of the default subtitle track **/
+    ,
+    set: function set(defaultSubtitleTrackName) {
+      var subtitleTrackController = this.subtitleTrackController;
+      if (subtitleTrackController) {
+        subtitleTrackController.defaultSubtitleTrackName = defaultSubtitleTrackName;
+      }
+    }
+
+    /** get unique subtitle track languages **/
+
+  }, {
+    key: 'subtitleTrackLanguages',
+    get: function get() {
+      return this.subtitleTracks.map(function (track) {
+        return track.lang;
+      });
+    }
+
+    /** get language of the selected subtitle track **/
+
+  }, {
+    key: 'subtitleTrackLanguage',
+    get: function get() {
+      return this.subtitleTrack !== -1 ? this.subtitleTracks[this.subtitleTrack].lang : null;
+    }
+
+    /** select an subtitle track, based on its language in subtitle track lists **/
+    ,
+    set: function set(subtitleTrackLanguage) {
+      this.subtitleTrack = this.subtitleTracks.map(function (track) {
+        return track.lang;
+      }).indexOf(subtitleTrackLanguage);
+    }
+
+    /** get language of the default subtitle track **/
+
+  }, {
+    key: 'defaultSubtitleTrackLanguage',
+    get: function get() {
+      var subtitleTrackController = this.subtitleTrackController;
+      return subtitleTrackController ? subtitleTrackController.defaultSubtitleTrackLanguage : null;
+    }
+
+    /** set language of the default subtitle track **/
+    ,
+    set: function set(defaultSubtitleTrackLanguage) {
+      var subtitleTrackController = this.subtitleTrackController;
+      if (subtitleTrackController) {
+        subtitleTrackController.defaultSubtitleTrackLanguage = defaultSubtitleTrackLanguage;
+      }
+    }
+
+    /** get visible of the subtitle track **/
+
+  }, {
+    key: 'subtitleTrackVisible',
+    get: function get() {
+      var subtitleTrackController = this.subtitleTrackController;
+      if (subtitleTrackController && this.media) {
+        if (subtitleTrackController.subtitleTrack !== -1) {
+          return this.media.textTracks[subtitleTrackController.subtitleTrack].mode === 'showing';
+        }
+      }
+      return false;
+    }
+
+    /** set visible of the subtitle track **/
+    ,
+    set: function set(subtitleTrackVisible) {
+      var subtitleTrackController = this.subtitleTrackController;
+      if (subtitleTrackController && this.media) {
+        if (subtitleTrackController.subtitleTrack !== -1) {
+          this.media.textTracks[subtitleTrackController.subtitleTrack].mode = subtitleTrackVisible ? 'showing' : 'disabled';
+        }
       }
     }
   }]);

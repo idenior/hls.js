@@ -11220,6 +11220,112 @@ var hls_Hls = function () {
         audioTrackController.audioTrack = audioTrackId;
       }
     }
+
+    /** get index of the default audio track **/
+
+  }, {
+    key: 'defaultAudioTrack',
+    get: function get() {
+      var audioTrackController = this.audioTrackController;
+      return audioTrackController ? audioTrackController.defaultAudioTrack : null;
+    }
+
+    /** set index of the default audio track **/
+    ,
+    set: function set(defaultAudioTrackId) {
+      var audioTrackController = this.audioTrackController;
+      if (audioTrackController) {
+        audioTrackController.defaultAudioTrack = defaultAudioTrackId;
+      }
+    }
+
+    /** get unique audio track names **/
+
+  }, {
+    key: 'audioTrackNames',
+    get: function get() {
+      return Array.from(new Set(this.audioTracks.map(function (track) {
+        return track.name;
+      })));
+    }
+
+    /** get name of the selected audio track **/
+
+  }, {
+    key: 'audioTrackName',
+    get: function get() {
+      return this.audioTrack !== -1 ? this.audioTracks[this.audioTrack].name : null;
+    }
+
+    /** select an audio track, based on its name in audio track lists **/
+    ,
+    set: function set(audioTrackName) {
+      this.audioTrack = this.audioTracks.map(function (track) {
+        return track.name;
+      }).lastIndexOf(audioTrackName);
+    }
+
+    /** get name of the default audio track **/
+
+  }, {
+    key: 'defaultAudioTrackName',
+    get: function get() {
+      var audioTrackController = this.audioTrackController;
+      return audioTrackController ? audioTrackController.defaultAudioTrackName : null;
+    }
+
+    /** set name of the default audio track **/
+    ,
+    set: function set(defaultAudioTrackName) {
+      var audioTrackController = this.audioTrackController;
+      if (audioTrackController) {
+        audioTrackController.defaultAudioTrackName = defaultAudioTrackName;
+      }
+    }
+
+    /** get unique audio track languages **/
+
+  }, {
+    key: 'audioTrackLanguages',
+    get: function get() {
+      return Array.from(new Set(this.audioTracks.map(function (track) {
+        return track.lang;
+      })));
+    }
+
+    /** get language of the selected audio track **/
+
+  }, {
+    key: 'audioTrackLanguage',
+    get: function get() {
+      return this.audioTrack !== -1 ? this.audioTracks[this.audioTrack].lang : null;
+    }
+
+    /** select an audio track, based on its language in audio track lists **/
+    ,
+    set: function set(audioTrackLanguage) {
+      this.audioTrack = this.audioTracks.map(function (track) {
+        return track.lang;
+      }).lastIndexOf(audioTrackLanguage);
+    }
+
+    /** get language of the default audio track **/
+
+  }, {
+    key: 'defaultAudioTrackLanguage',
+    get: function get() {
+      var audioTrackController = this.audioTrackController;
+      return audioTrackController ? audioTrackController.defaultAudioTrackLanguage : null;
+    }
+
+    /** set language of the default audio track **/
+    ,
+    set: function set(defaultAudioTrackLanguage) {
+      var audioTrackController = this.audioTrackController;
+      if (audioTrackController) {
+        audioTrackController.defaultAudioTrackLanguage = defaultAudioTrackLanguage;
+      }
+    }
   }, {
     key: 'liveSyncPosition',
     get: function get() {
@@ -11248,8 +11354,145 @@ var hls_Hls = function () {
     ,
     set: function set(subtitleTrackId) {
       var subtitleTrackController = this.subtitleTrackController;
+      if (subtitleTrackController && this.media) {
+        //subtitleTrackController.subtitleTrack = subtitleTrackId; // TODO Don't set!
+        if (subtitleTrackId >= 0 && subtitleTrackId < this.subtitleTracks.length) {
+          if (subtitleTrackController.subtitleTrack !== -1) {
+            this.media.textTracks[subtitleTrackController.subtitleTrack].mode = 'disabled';
+          }
+          this.media.textTracks[subtitleTrackId].mode = 'showing';
+        }
+      }
+    }
+
+    /** get index of the default subtitle track **/
+
+  }, {
+    key: 'defaultSubtitleTrack',
+    get: function get() {
+      var subtitleTrackController = this.subtitleTrackController;
+      return subtitleTrackController ? subtitleTrackController.defaultSubtitleTrack : null;
+    }
+
+    /** set index of the default subtitle track **/
+    ,
+    set: function set(defaultSubtitleTrackId) {
+      var subtitleTrackController = this.subtitleTrackController;
       if (subtitleTrackController) {
-        subtitleTrackController.subtitleTrack = subtitleTrackId;
+        subtitleTrackController.defaultSubtitleTrack = defaultSubtitleTrackId;
+      }
+    }
+
+    /** get unique subtitle track names **/
+
+  }, {
+    key: 'subtitleTrackNames',
+    get: function get() {
+      return this.subtitleTracks.map(function (track) {
+        return track.name;
+      });
+    }
+
+    /** get name of the selected subtitle track **/
+
+  }, {
+    key: 'subtitleTrackName',
+    get: function get() {
+      return this.subtitleTrack !== -1 ? this.subtitleTracks[this.subtitleTrack].name : null;
+    }
+
+    /** select an subtitle track, based on its name in subtitle track lists **/
+    ,
+    set: function set(subtitleTrackName) {
+      this.subtitleTrack = this.subtitleTracks.map(function (track) {
+        return track.name;
+      }).indexOf(subtitleTrackName);
+    }
+
+    /** get name of the default subtitle track **/
+
+  }, {
+    key: 'defaultSubtitleTrackName',
+    get: function get() {
+      var subtitleTrackController = this.subtitleTrackController;
+      return subtitleTrackController ? subtitleTrackController.defaultSubtitleTrackName : null;
+    }
+
+    /** set name of the default subtitle track **/
+    ,
+    set: function set(defaultSubtitleTrackName) {
+      var subtitleTrackController = this.subtitleTrackController;
+      if (subtitleTrackController) {
+        subtitleTrackController.defaultSubtitleTrackName = defaultSubtitleTrackName;
+      }
+    }
+
+    /** get unique subtitle track languages **/
+
+  }, {
+    key: 'subtitleTrackLanguages',
+    get: function get() {
+      return this.subtitleTracks.map(function (track) {
+        return track.lang;
+      });
+    }
+
+    /** get language of the selected subtitle track **/
+
+  }, {
+    key: 'subtitleTrackLanguage',
+    get: function get() {
+      return this.subtitleTrack !== -1 ? this.subtitleTracks[this.subtitleTrack].lang : null;
+    }
+
+    /** select an subtitle track, based on its language in subtitle track lists **/
+    ,
+    set: function set(subtitleTrackLanguage) {
+      this.subtitleTrack = this.subtitleTracks.map(function (track) {
+        return track.lang;
+      }).indexOf(subtitleTrackLanguage);
+    }
+
+    /** get language of the default subtitle track **/
+
+  }, {
+    key: 'defaultSubtitleTrackLanguage',
+    get: function get() {
+      var subtitleTrackController = this.subtitleTrackController;
+      return subtitleTrackController ? subtitleTrackController.defaultSubtitleTrackLanguage : null;
+    }
+
+    /** set language of the default subtitle track **/
+    ,
+    set: function set(defaultSubtitleTrackLanguage) {
+      var subtitleTrackController = this.subtitleTrackController;
+      if (subtitleTrackController) {
+        subtitleTrackController.defaultSubtitleTrackLanguage = defaultSubtitleTrackLanguage;
+      }
+    }
+
+    /** get visible of the subtitle track **/
+
+  }, {
+    key: 'subtitleTrackVisible',
+    get: function get() {
+      var subtitleTrackController = this.subtitleTrackController;
+      if (subtitleTrackController && this.media) {
+        if (subtitleTrackController.subtitleTrack !== -1) {
+          return this.media.textTracks[subtitleTrackController.subtitleTrack].mode === 'showing';
+        }
+      }
+      return false;
+    }
+
+    /** set visible of the subtitle track **/
+    ,
+    set: function set(subtitleTrackVisible) {
+      var subtitleTrackController = this.subtitleTrackController;
+      if (subtitleTrackController && this.media) {
+        if (subtitleTrackController.subtitleTrack !== -1) {
+          this.media.textTracks[subtitleTrackController.subtitleTrack].mode = subtitleTrackVisible ? 'showing' : 'disabled';
+        }
       }
     }
   }]);

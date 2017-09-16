@@ -96,7 +96,7 @@ class SubtitleTrackController extends EventHandler {
     // find and select default track
     if (this.defaultTrackId >= 0 && this.defaultTrackId < tracks.length) {
       tracks.forEach(track => {
-        track.default = track.id == this.defaultTrackId;
+        track.default = track.id === this.defaultTrackId;
       });
     }
     if (this.defaultTrackName) {
@@ -195,7 +195,7 @@ class SubtitleTrackController extends EventHandler {
 
   /** set a default subtitle track, based on its index in subtitle track lists **/
   set defaultSubtitleTrack(defaultSubtitleTrackId) {
-    this.defaultTrackId = defaultSubtitleTrackId;
+    this.defaultTrackId = Number(defaultSubtitleTrackId);
     this.defaultTrackName = undefined;
     this.defaultTrackLanguage = undefined;
   }

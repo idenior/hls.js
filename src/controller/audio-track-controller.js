@@ -62,7 +62,7 @@ class AudioTrackController extends EventHandler {
     // find and select default track
     if (this.defaultTrackId >= 0 && this.defaultTrackId < tracks.length) {
       tracks.forEach(track => {
-        track.default = track.id == this.defaultTrackId;
+        track.default = track.id === this.defaultTrackId;
       });
     }
     if (this.defaultTrackName) {
@@ -145,7 +145,7 @@ class AudioTrackController extends EventHandler {
 
   /** set a default audio track, based on its index in audio track lists **/
   set defaultAudioTrack(defaultAudioTrackId) {
-    this.defaultTrackId = defaultAudioTrackId;
+    this.defaultTrackId = Number(defaultAudioTrackId);
     this.defaultTrackName = undefined;
     this.defaultTrackLanguage = undefined;
   }
