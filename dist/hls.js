@@ -14938,7 +14938,7 @@ var hls_Hls = function () {
   hls__createClass(Hls, null, [{
     key: 'version',
     get: function get() {
-      return "0.8.2";
+      return "0.8.3";
     }
   }, {
     key: 'Events',
